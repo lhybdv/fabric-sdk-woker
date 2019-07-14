@@ -1,0 +1,29 @@
+= fabric-sdk-demo
+
+本项目以一个 fabric 测试环境为基础，演示了 https://github.com/hyperledger/fabric-sdk-go[fabric-sdk-go] 部分功能的使用。
+
+== 完成的功能
+
+* 查找已安装的 chaincode
+* 查找已初始化的 chaincode
+* 根据 chaincode 创建账户
+* 根据 chaincode 查看账户余额
+* 根据 chaincode 转账
+* 更新 chaincode 的背书策略
+
+== 对外提供的接口
+
+=== web api
+
+通过 go 的轻量级 web 框架 https://github.com/hyperledger/fabric-sdk-go[Gin]，对外提供了 web api 接口。
+
+== web 页面部分截图
+.查看 chaincode
+image::2019-07-11-16-46-59.png[]
+
+
+.交易
+image::2019-07-11-16-47-21.png[]
+
+.更新背书策略
+image::2019-07-11-16-47-39.png[]

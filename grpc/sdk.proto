@@ -1,0 +1,48 @@
+syntax = "proto3";
+package sdk;
+
+service ChainCode {
+    rpc QueryInstalled (Empty) returns (stream ChainCodeInfo) {}
+    rpc QueryInstantiated (Empty) returns (stream ChainCodeInfo) {}
+    rpc Upgrade(string) returns (UpgradeResult) {}
+}
+
+message Empty { }
+
+message ChainCodeInfo {
+    string Org = 1;
+    string Name = 2;
+    string Version = 3;
+}
+
+message UpgradeResult {
+    string Status = 1;
+    string Version = 2;
+    string Policy = 3;
+}
+
+service Transaction {
+    rpc Query(string) returns (string) {}
+    rpc Create(CreateInput) returns (string) {}
+    rpc Transfer(TransferInput) returns (string) {}
+    rpc QueryById(string) returns (TransactionResult) {}
+}
+
+message CreateInput {
+    string Account = 1;
+    string Amount = 2;
+}
+
+message TransferInput {
+    string From = 1;
+    string To = 2;
+    string Amount = 3;
+}
+
+message TransactionResult {
+    string TransactionId = 1;
+    string CreateTime = 2;
+    repeated string Args = 3;
+}
+
+

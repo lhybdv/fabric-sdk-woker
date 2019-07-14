@@ -1,0 +1,18 @@
+AnchorOrg: org2
+Peers:
+  - IP: 54.255.239.58
+    Org: org1
+    Policy: Org1MSP.member
+
+  - IP: 13.229.49.131
+    Org: org2
+    Policy: Org2MSP.member
+
+  - IP: 54.179.169.147
+    Org: org3
+    Policy: Org3MSP.member
+
+  - IP: 52.77.242.99
+    Org: org4
+    Policy: Org4MSP.member
+

@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+</head>
+<body>
+<div id="app">
+    <el-tabs v-model="activeName" @tab-click="handleClick">
+        <el-tab-pane label="Query ChainCode" name="first">
+            <el-button type="primary" @click="queryInstantiatedCCInfo">Query instantiated chaincode infos</el-button>
+            <el-button type="primary" @click="queryInstalledCCInfo">Query installed chaincode infos</el-button>
+            <h3>{{chaincodeType}}</h3>
+            <el-table :data="orgCCInfos" style="width: 100%">
+                <el-table-column prop="Org" label="Organization" width="180"></el-table-column>
+                <el-table-column prop="Name" label="Name" width="180"></el-table-column>
+                <el-table-column prop="Version" label="Version"></el-table-column>
+            </el-table>
+        </el-tab-pane>
+        <el-tab-pane label="Transaction" name="second">
+            <el-form :inline="true" :model="formInline" class="demo-form-inline">
+                <el-form-item>
+                    <el-input placeholder="Account" v-model="queryAccount"></el-input>
+                </el-form-item>
+                <el-form-item>
+                    <el-button type="primary" @click="query">Query</el-button>
+                </el-form-item>
+            </el-form>
+            <el-form :inline="true" :model="formInline" class="demo-form-inline">
+                <el-form-item>
+                    <el-input placeholder="Account" v-model="createAccount"></el-input>
+                </el-form-item>
+                <el-form-item>
+                    <el-input placeholder="Amount" v-model="createAmount"></el-input>
+                </el-form-item>
+                <el-form-item>
+                    <el-button type="primary" @click="create">Create</el-button>
+                </el-form-item>
+            </el-form>
+            <el-form :inline="true" :model="formInline" class="demo-form-inline">
+                <el-form-item>
+                    <el-input placeholder="From" v-model="fromAccount"></el-input>
+                </el-form-item>
+                <el-form-item>
+                    <el-input placeholder="To" v-model="toAccount"></el-input>
+                </el-form-item>
+                <el-form-item>
+                    <el-input placeholder="Amount" v-model="transferAmount"></el-input>
+                </el-form-item>
+                <el-form-item>
+                    <el-button type="primary" @click="transfer">Transfer</el-button>
+                </el-form-item>
+            </el-form>
+            <el-row>
+               <el-col >
+                   <el-input placeholder="Transaction ID" v-model="txId"></el-input>
+               </el-col>
+                <el-col :span="12">
+                    <el-button type="primary" @click="queryById">Query By Id</el-button>
+                </el-col>
+            </el-row>
+        </el-tab-pane>
+        <el-tab-pane label="Uprade Policy" name="third">
+            <el-button type="primary" @click="org1234">Org1, Org2, Org3, Org4</el-button>
+            <el-button type="primary" @click="org123">Org1, Org2, Org3</el-button>
+            <el-button type="primary" @click="org234">Org2, Org3, Org4</el-button>
+            <el-button type="primary" @click="org1">Org1</el-button>
+        </el-tab-pane>
+    </el-tabs>
+    <el-dialog
+            title="Result"
+            :visible.sync="dialogVisible">
+        {{dialogText}}
+    </el-dialog>
+</div>
+</body>
+<script src="https://unpkg.com/vue/dist/vue.js"></script>
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            activeName: "first",
+            orgCCInfos: [],
+            upgradeResult: "",
+            txResult: "",
+            dialogVisible: false,
+            fullscreenLoading: false,
+            queryAccount: "",
+            createAccount: "",
+            createAmount: "",
+            fromAccount: "",
+            toAccount: "",
+            transferAmount: "",
+            txId: "",
+        },
+        methods: {
+            queryInstantiatedCCInfo: function () {
+                let loading = this.openLoading();
+                this.orgCCInfos = [];
+                this.chaincodeType = "";
+                let that = this;
+                axios.get("/chaincode/QueryInstantiated")
+                    .then(function (rep) {
+                        loading.close();
+                        that.chaincodeType = "Instantiated";
+                        that.orgCCInfos = rep.data;
+                    })
+            },
+
+            queryInstalledCCInfo: function () {
+                let loading = this.openLoading();
+                this.orgCCInfos = [];
+                this.chaincodeType = "";
+                let that = this;
+                axios.get("/chaincode/QueryInstalled")
+                    .then(function (rep) {
+                        loading.close();
+                        that.chaincodeType = "Installed";
+                        that.orgCCInfos = rep.data;
+                    })
+            },
+
+            org1234: function () {
+                let loading = this.openLoading();
+                let that = this;
+                axios({
+                    url: '/policy/upgrade',
+                    method: 'post',
+                    data: {
+                        nodes: "[[14311, '54.255.239.58'], [10665, '13.229.49.131'], [7988, '54.179.169.147'], [7281, '52.77.242.99']]"
+                    },
+                    transformRequest: [function (data) {
+                        // Do whatever you want to transform the data
+                        let ret = ''
+                        for (let it in data) {
+                            ret += encodeURIComponent(it) + '=' + encodeURIComponent(data[it]) + '&'
+                        }
+                        return ret
+                    }],
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                }).then(function (rep) {
+                    loading.close();
+                    that.dialogText = rep.data;
+                    that.dialogVisible = true;
+                })
+            },
+            org123: function () {
+                let loading = this.openLoading();
+                let that = this;
+                axios({
+                    url: '/policy/upgrade',
+                    method: 'post',
+                    data: {
+                        nodes: "[[14311, '54.255.239.58'], [10665, '13.229.49.131'], [7988, '54.179.169.147']]"
+                    },
+                    transformRequest: [function (data) {
+                        // Do whatever you want to transform the data
+                        let ret = '';
+                        for (let it in data) {
+                            ret += encodeURIComponent(it) + '=' + encodeURIComponent(data[it]) + '&'
+                        }
+                        return ret
+                    }],
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                }).then(function (rep) {
+                    loading.close();
+                    that.dialogText = rep.data;
+                    that.dialogVisible = true;
+                })
+            },
+            org234: function () {
+                let loading = this.openLoading();
+                let that = this;
+                axios({
+                    url: '/policy/upgrade',
+                    method: 'post',
+                    data: {
+                        nodes: "[[10665, '13.229.49.131'], [7988, '54.179.169.147'], [7281, '52.77.242.99']]"
+                    },
+                    transformRequest: [function (data) {
+                        // Do whatever you want to transform the data
+                        let ret = '';
+                        for (let it in data) {
+                            ret += encodeURIComponent(it) + '=' + encodeURIComponent(data[it]) + '&'
+                        }
+                        return ret
+                    }],
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                }).then(function (rep) {
+                    loading.close();
+                    that.dialogText = rep.data;
+                    that.dialogVisible = true;
+                })
+            },
+            org1: function () {
+                let loading = this.openLoading();
+                let that = this;
+                axios({
+                    url: '/policy/upgrade',
+                    method: 'post',
+                    data: {
+                        nodes: "[[14311, '54.255.239.58']]"
+                    },
+                    transformRequest: [function (data) {
+                        // Do whatever you want to transform the data
+                        let ret = '';
+                        for (let it in data) {
+                            ret += encodeURIComponent(it) + '=' + encodeURIComponent(data[it]) + '&'
+                        }
+                        return ret
+                    }],
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                }).then(function (rep) {
+                    loading.close();
+                    that.dialogText = rep.data;
+                    that.dialogVisible = true;
+                })
+            },
+            query: function () {
+                let loading = this.openLoading();
+                let that = this;
+                axios.get("/tx/query?account=" + this.queryAccount)
+                    .then(function (rep) {
+                        loading.close();
+                        that.dialogText = rep.data;
+                        that.dialogVisible = true;
+                    })
+            },
+            create: function () {
+                let loading = this.openLoading();
+                let that = this;
+                axios.get("/tx/create?account=" + this.createAccount + "&amount=" + this.createAmount)
+                    .then(function (rep) {
+                        loading.close();
+                        that.dialogText = rep.data;
+                        that.dialogVisible = true;
+                    })
+            },
+            transfer: function () {
+                let loading = this.openLoading();
+                let that = this;
+                axios.get("/tx/transfer", {
+                    params: {
+                        fromAccount: this.fromAccount,
+                        toAccount: this.toAccount,
+                        transferAmount: this.transferAmount,
+                    }
+                })
+                    .then(function (rep) {
+                        loading.close();
+                        that.dialogText = rep.data;
+                        that.dialogVisible = true;
+                    })
+            },
+            queryById: function() {
+                let loading = this.openLoading();
+                let that = this;
+                axios.get("/tx/queryById?txId=" + this.txId)
+                    .then(function (rep) {
+                        loading.close();
+                        that.dialogText = rep.data;
+                        that.dialogVisible = true;
+                    })
+            },
+            openLoading: function () {
+                return this.$loading({background: 'rgba(0,0,0,0.6)'});
+            }
+        }
+    })
+</script>
+</html>
